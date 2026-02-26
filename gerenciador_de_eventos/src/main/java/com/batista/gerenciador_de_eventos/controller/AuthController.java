@@ -6,6 +6,7 @@ import com.batista.gerenciador_de_eventos.dto.request.RegistrarUsuarioRequest;
 import com.batista.gerenciador_de_eventos.dto.response.LoginResponse;
 import com.batista.gerenciador_de_eventos.dto.response.RegistrarUsuarioResponse;
 import com.batista.gerenciador_de_eventos.entity.Usuario.Usuario;
+import com.batista.gerenciador_de_eventos.entity.Usuario.UsuarioRole;
 import com.batista.gerenciador_de_eventos.repository.UsuarioRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +47,7 @@ public class AuthController {
 
         novoUsuario.setNome(request.nome());
         novoUsuario.setEmail(request.email());
+        novoUsuario.setRole(UsuarioRole.USUARIO);
         novoUsuario.setSenha(passwordEncoder.encode(request.senha()));
 
         usuarioRepository.saveAndFlush(novoUsuario);
