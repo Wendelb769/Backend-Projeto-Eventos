@@ -33,22 +33,31 @@ public class UsuarioService {
             eventoRepository.deleteEventosUsuarioById(id);
             usuarioRepository.deleteById(id);
         } else{
-            throw new AccessDeniedException("Você não tem permissão para excluir esta conta");
+            throw new AccessDeniedException("Você não tem permissão para excluir esta conta.");
         }
     }
 
-    public void atualizarUsuarioPorId(Long id, Usuario usuario){
+    public void atualizarUsuarioPorId(Long id, JWTUserData usuarioLogado, Usuario usuario){
         Usuario usuarioEntity = usuarioRepository.findById(id).orElseThrow(
                 () -> new RuntimeException("Id não encontrado"));
 
-        Usuario usuarioAtualizado = Usuario.builder()
-                .id(usuarioEntity.getId())
-                .nome(usuario.getNome() != null ? usuario.getNome() : usuarioEntity.getNome())
-                .email(usuario.getEmail() != null ? usuario.getEmail() : usuarioEntity.getEmail())
-                .senha(usuario.getSenha() != null ? usuario.getSenha() : usuarioEntity.getSenha())
-                .build();
+        boolean donoDaConta = usuarioLogado.usuarioId().equals(usuarioEntity.getId());
+        boolean admin = usuarioLogado.role().equals("ADMIN");
 
-        usuarioRepository.saveAndFlush(usuarioAtualizado);
+        if (donoDaConta || admin){
+            Usuario usuarioAtualizado = Usuario.builder()
+                    .id(usuarioEntity.getId())
+                    .nome(usuario.getNome() != null ? usuario.getNome() : usuarioEntity.getNome())
+                    .email(usuario.getEmail() != null ? usuario.getEmail() : usuarioEntity.getEmail())
+                    .senha(usuario.getSenha() != null ? usuario.getSenha() : usuarioEntity.getSenha())
+                    .role(admin && usuario.getRole() != null ? usuario.getRole() : usuarioEntity.getRole())
+                    .build();
+
+            usuarioRepository.saveAndFlush(usuarioAtualizado);
+        } else{
+            throw new AccessDeniedException("Você não tem permissão pra atualizar essa conta.");
+        }
+
     }
 
 }

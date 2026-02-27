@@ -27,8 +27,8 @@ public class UsuarioController {
     }
 
     @PutMapping(path = "/{id}")
-    public ResponseEntity<Void> atualizarUsuario(@PathVariable Long id, @RequestBody Usuario usuario){
-        usuarioService.atualizarUsuarioPorId(id, usuario);
+    public ResponseEntity<Void> atualizarUsuario(@PathVariable Long id, @AuthenticationPrincipal JWTUserData usuarioLogado, @RequestBody Usuario usuario){
+        usuarioService.atualizarUsuarioPorId(id, usuarioLogado, usuario);
         return ResponseEntity.ok().build();
     }
 }
