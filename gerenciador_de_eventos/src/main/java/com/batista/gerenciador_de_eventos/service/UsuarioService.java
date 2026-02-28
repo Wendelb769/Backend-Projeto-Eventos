@@ -29,9 +29,8 @@ public class UsuarioService {
         Usuario usuarioNoBanco = usuarioRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Id não encontrado"));
 
         boolean donoDaConta = usuarioLogado.usuarioId().equals(usuarioNoBanco.getId());
-        boolean admin = usuarioLogado.role().equals("ADMIN");
 
-        if (donoDaConta || admin){
+        if (donoDaConta || isAdmin()){
             eventoRepository.deleteEventosUsuarioById(id);
             usuarioRepository.deleteById(id);
         } else{
