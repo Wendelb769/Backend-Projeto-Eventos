@@ -1,5 +1,7 @@
 package com.batista.gerenciador_de_eventos.config;
 
+import com.batista.gerenciador_de_eventos.repository.UsuarioRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,6 +20,7 @@ import java.util.Optional;
 public class SecurityFilter extends OncePerRequestFilter {
 
     private final TokenConfig tokenConfig;
+    private final UsuarioRepository usuarioRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -30,12 +33,13 @@ public class SecurityFilter extends OncePerRequestFilter {
 
             if (optUser.isPresent()){
                 JWTUserData userData = optUser.get();
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userData, null, userData.getAuthorities());
+                var usuarioNoBanco = usuarioRepository.findById(userData.usuarioId()).orElseThrow(() -> new EntityNotFoundException("Usuario não encontrado"));
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userData, null, usuarioNoBanco.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         }
-
         filterChain.doFilter(request, response);
     }
+
 }
 
