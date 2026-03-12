@@ -9,6 +9,7 @@ import com.batista.gerenciador_de_eventos.repository.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Request;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -19,19 +20,24 @@ import java.util.List;
 @Service
 public class EventoService {
     private final EventoRepository eventoRepository;
+    private final UsuarioRepository usuarioRepository;
 
-    public Evento salvarEvento(EventoRequest request, Usuario usuarioLogado) {
-        Evento newEvento = new Evento();
+    public void salvarEvento(EventoRequest request, JWTUserData usuarioLogado) {
 
-        newEvento.setTitulo(request.titulo());
-        newEvento.setHorario(request.horario());
-        newEvento.setData(request.data());
-        newEvento.setDescricao(request.descricao());
-        newEvento.setImagem(request.imagem());
-        newEvento.setLocal(request.local());
-        newEvento.setUsuarioId(usuarioLogado);
+        Usuario dono = usuarioRepository.findById(usuarioLogado.usuarioId()).orElseThrow(() -> new EntityNotFoundException("Id não encontrado"));
 
-        return eventoRepository.saveAndFlush(newEvento);
+        Evento novoEvento = Evento.builder()
+                .titulo(request.titulo())
+                .horario(request.horario())
+                .data(request.data())
+                .descricao(request.descricao())
+                .imagem(request.imagem())
+                .local(request.local())
+                .usuarioId(dono)
+                .build();
+
+        eventoRepository.saveAndFlush(novoEvento);
+
     }
 
     public List<Evento> buscarTodosOsEventos() {

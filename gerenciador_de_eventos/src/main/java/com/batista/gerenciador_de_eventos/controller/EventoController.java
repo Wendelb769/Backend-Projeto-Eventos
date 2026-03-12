@@ -37,12 +37,9 @@ public class EventoController {
     }
 
     @PostMapping
-    public ResponseEntity<Evento> salvarEvento(@Valid @RequestBody EventoRequest request){
-        JWTUserData jwtUserData = (JWTUserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Usuario usuarioLogado = usuarioRepository.findById(jwtUserData.usuarioId()).orElseThrow(() -> new RuntimeException("Usuario não encontrado"));
-        Evento novoEvento = eventoService.salvarEvento(request, usuarioLogado);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(novoEvento);
+    public ResponseEntity<Void> salvarEvento(@Valid @RequestBody EventoRequest request, @AuthenticationPrincipal JWTUserData usuarioLogado){
+        eventoService.salvarEvento(request, usuarioLogado);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PutMapping(path = "/{id}")
