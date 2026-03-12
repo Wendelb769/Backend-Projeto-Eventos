@@ -31,7 +31,7 @@ public class UsuarioService {
         boolean donoDaConta = usuarioLogado.usuarioId().equals(usuarioNoBanco.getId());
 
         if (donoDaConta || isAdmin()){
-            eventoRepository.deleteEventosUsuarioById(id);
+            eventoRepository.deleteAllEventosUsuarioById(id);
             usuarioRepository.deleteById(id);
         } else{
             throw new AccessDeniedException("Você não tem permissão para excluir esta conta.");

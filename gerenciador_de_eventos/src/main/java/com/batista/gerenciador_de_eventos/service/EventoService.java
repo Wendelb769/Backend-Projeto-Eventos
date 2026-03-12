@@ -1,10 +1,16 @@
 package com.batista.gerenciador_de_eventos.service;
 
+import com.batista.gerenciador_de_eventos.config.JWTUserData;
 import com.batista.gerenciador_de_eventos.dto.request.EventoRequest;
 import com.batista.gerenciador_de_eventos.entity.Evento.Evento;
 import com.batista.gerenciador_de_eventos.entity.Usuario.Usuario;
 import com.batista.gerenciador_de_eventos.repository.EventoRepository;
+import com.batista.gerenciador_de_eventos.repository.UsuarioRepository;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -37,8 +43,19 @@ public class EventoService {
                 () -> new RuntimeException("Id não encontrado!"));
     }
 
-    public void deleteEventoPorId(Long id) {
-        eventoRepository.deleteById(id);
+    @Transactional
+    public void deleteEventoPorId(Long idEvento, JWTUserData usuarioLogado) {
+
+        Evento evento = eventoRepository.findById(idEvento).orElseThrow(() -> new EntityNotFoundException("Evento não encontrado"));
+
+        Long idDonoDoEvento = evento.getUsuarioId().getId();
+        boolean donoDoEvento = usuarioLogado.usuarioId().equals(idDonoDoEvento);
+
+        if (donoDoEvento || isAdmin()){
+            eventoRepository.deleteById(idEvento);
+        } else{
+            throw new AccessDeniedException("Sem permissão para excluir o evento desse usuario");
+        }
     }
 
     public void atualizarEvento(Long id, Evento evento) {
@@ -59,4 +76,12 @@ public class EventoService {
 
         eventoRepository.saveAndFlush(eventoAtualizado);
     }
+
+    private boolean isAdmin(){
+        return SecurityContextHolder.getContext().getAuthentication()
+                .getAuthorities()
+                .stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+    }
+
 }

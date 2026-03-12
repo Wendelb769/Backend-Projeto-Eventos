@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -50,10 +51,10 @@ public class EventoController {
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping
-    public ResponseEntity<Void> deletarEvento(@RequestParam Long id){
-        eventoService.deleteEventoPorId(id);
-        return ResponseEntity.ok().build();
+    @DeleteMapping(path = "/{idEvento}")
+    public ResponseEntity<Void> deletarEvento(@PathVariable Long idEvento, @AuthenticationPrincipal JWTUserData usuarioLogado){
+        eventoService.deleteEventoPorId(idEvento, usuarioLogado);
+        return ResponseEntity.noContent().build();
     }
 
 }

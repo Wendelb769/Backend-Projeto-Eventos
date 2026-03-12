@@ -11,5 +11,5 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
     @Modifying
     @Transactional
     @Query("DELETE FROM Evento e WHERE e.usuarioId.id = :id")
-    void deleteEventosUsuarioById(Long id);
+    void deleteAllEventosUsuarioById(Long id);
 }
